@@ -1,7 +1,6 @@
 package com.phoenixx;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +21,9 @@ public class VugenThinker {
     public static int thinkTime = 0;
     public static boolean limitThinkTime = false;
 
-    public static void main(String[] args) throws UnsupportedEncodingException {
+    public static List<VugenScript> loadedScripts = new ArrayList<>();
+
+    public static void main(String[] args) throws IOException {
         if(DEBUG_ENV) {
             System.out.println("WARNING: The VugenThinker application is set to run in a DEBUG ENVIRONMENT. EXIT NOW OR THERE MAY BE DATA LOSS.");
         }
@@ -70,19 +71,18 @@ public class VugenThinker {
         }
 
         // Script folders
-        for(File script: vugenScripts) {
-            if(!script.isDirectory()) {
-                System.out.println("Script file: " + script.getName() + " IS NOT A DIRECTORY. Cancelling...");
+        for(File scriptFolder: vugenScripts) {
+            if(!scriptFolder.isDirectory()) {
+                System.out.println("Script file: " + scriptFolder.getName() + " IS NOT A DIRECTORY. Cancelling...");
                 return;
             }
-            List<File> scriptFiles = new ArrayList<>();
 
-            // All files inside the main script file
-            for(File scriptFile: Objects.requireNonNull(script.listFiles())) {
-                if(scriptFile.getName().contains(".usr")) {
+            VugenScript vugenScript = VugenScript.buildScript(scriptFolder);
 
-                }
-            }
+            System.out.println("================= Script details =================");
+            System.out.println("Script name: " + vugenScript.getScriptFile().getName());
+            System.out.println("Config file: " + vugenScript.getConfigName());
+            System.out.println("Action files: " + vugenScript.getActionFiles());
         }
 
         //File currentFile = new File(path);
