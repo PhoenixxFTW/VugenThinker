@@ -78,11 +78,16 @@ public class VugenThinker {
             }
 
             VugenScript vugenScript = VugenScript.buildScript(scriptFolder);
+            vugenScript.setLimitThinkTime(true);
+            vugenScript.setThinkTime(100);
 
             System.out.println("================= Script details =================");
             System.out.println("Script name: " + vugenScript.getScriptFile().getName());
             System.out.println("Config file: " + vugenScript.getConfigName());
             System.out.println("Action files: " + vugenScript.getActionFiles());
+
+            System.out.println("UPDATING SCRIPT...");
+            vugenScript.updateScript();
         }
 
         //File currentFile = new File(path);

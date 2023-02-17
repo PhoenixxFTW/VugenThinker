@@ -69,6 +69,67 @@ public class VugenScript {
         return vugenScript;
     }
 
+    // Called to update think times in both the config and action files
+    public void updateScript() throws IOException {
+        this.updateConfig();
+        this.updateActionFiles();
+    }
+
+    private void updateConfig() throws IOException {
+        List<String> lines = new ArrayList<>();
+
+        String line;
+        File configFolder = new File(scriptFolder, this.getConfigName());
+        FileReader fileReader = new FileReader(configFolder);
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+        while ((line = bufferedReader.readLine()) != null) {
+            if (line.contains("LimitFlag=")) {
+                line = "LimitFlag="+(this.isLimitThinkTime() ? 1 : 0);
+            }
+            lines.add(line);
+        }
+        fileReader.close();
+        bufferedReader.close();
+
+        FileOutputStream fos = new FileOutputStream(configFolder);
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+        for (String newLine: lines) {
+            bw.write(newLine);
+            bw.newLine();
+        }
+        bw.close();
+    }
+
+    private void updateActionFiles() throws IOException {
+        for(String actionFile: this.getActionFiles()) {
+            List<String> lines = new ArrayList<>();
+
+            String line;
+            File configFolder = new File(scriptFolder, actionFile);
+            FileReader fileReader = new FileReader(configFolder);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+            while ((line = bufferedReader.readLine()) != null) {
+                if (line.contains("lr_think_time")) {
+                    line = "\tlr_think_time("+this.getThinkTime()+");";
+                }
+                lines.add(line);
+            }
+            fileReader.close();
+            bufferedReader.close();
+
+            FileOutputStream fos = new FileOutputStream(configFolder);
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+            for (String newLine: lines) {
+                bw.write(newLine);
+                bw.newLine();
+            }
+            bw.close();
+            System.out.println("Updated: " + actionFile);
+        }
+    }
+
     public void setScriptFile(File scriptFile) {
         this.scriptFile = scriptFile;
     }
