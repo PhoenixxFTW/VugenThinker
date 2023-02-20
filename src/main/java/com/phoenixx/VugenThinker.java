@@ -1,9 +1,9 @@
 package com.phoenixx;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,6 +24,7 @@ public class VugenThinker {
     public static List<VugenScript> loadedScripts = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
+        System.out.println();
         if(DEBUG_ENV) {
             System.out.println("WARNING: The VugenThinker application is set to run in a DEBUG ENVIRONMENT. EXIT NOW OR THERE MAY BE DATA LOSS.");
         }
@@ -35,10 +36,10 @@ public class VugenThinker {
         if(DEBUG_ENV) {
             // We remove the last part of the string if this is running in a workspace from the build's folder (/build/classes/java/main/)
             currentPath = currentPath.substring(1, currentPath.length() - 24);
-            currentPath += "/TestScripts/";
+            currentPath += "TestScripts/";
         }
 
-        System.out.println("Path of current program; " + currentPath);
+        System.out.println("Path of current program: " + currentPath);
 
         File folder = new File(currentPath);
         if(!folder.isDirectory()) {
@@ -46,52 +47,50 @@ public class VugenThinker {
             return;
         }
 
-        System.out.println("FOUND: " + folder.getAbsolutePath());
-        System.out.println("All files in current directory: " + Arrays.toString(folder.list()));
+        System.out.println("Found " + Objects.requireNonNull(folder.list()).length + " potential script files, loading now...");
 
         List<File> vugenScripts = new ArrayList<>();
 
         for(File fileFound: Objects.requireNonNull(folder.listFiles())) {
             if(fileFound.isDirectory()) {
-                System.out.println("Directory: " + fileFound.getName());
+                //System.out.println("Directory: " + fileFound.getName());
                 boolean isVugenScript = false;
                 for(String fileName: Objects.requireNonNull(fileFound.list())) {
-                    System.out.println("\t> " + fileName);
-                    // TODO Save this in a custom object
+                    //System.out.println("\t> " + fileName);
                     if(fileName.contains(".usr")) {
                         isVugenScript = true;
                         break;
                     }
                 }
                 if(isVugenScript) {
-                    System.out.println("Found Vugen script folder: " + fileFound.getName());
+                    //System.out.println("Found Vugen script: " + fileFound.getName());
                     vugenScripts.add(fileFound);
                 }
             }
         }
 
+        System.out.println("================= Script details =================");
+        System.out.println("All scripts found: ");
+
+        int count = 1;
         // Script folders
         for(File scriptFolder: vugenScripts) {
             if(!scriptFolder.isDirectory()) {
                 System.out.println("Script file: " + scriptFolder.getName() + " IS NOT A DIRECTORY. Cancelling...");
-                return;
+                continue;
             }
 
             VugenScript vugenScript = VugenScript.buildScript(scriptFolder);
-            vugenScript.setLimitThinkTime(true);
-            vugenScript.setThinkTime(100);
+            System.out.println(count+") " + vugenScript.getScriptFile().getName());
+            System.out.println("\t> Config File: " + vugenScript.getConfigName());
+            System.out.println("\t> Action files: " + vugenScript.getActionFiles());
 
-            System.out.println("================= Script details =================");
-            System.out.println("Script name: " + vugenScript.getScriptFile().getName());
-            System.out.println("Config file: " + vugenScript.getConfigName());
-            System.out.println("Action files: " + vugenScript.getActionFiles());
-
-            System.out.println("UPDATING SCRIPT...");
+            vugenScript.setThinkTime(29);
             vugenScript.updateScript();
+
+            loadedScripts.add(vugenScript);
+
+            count++;
         }
-
-        //File currentFile = new File(path);
-
-        //String decodedPath = URLDecoder.decode(path, "UTF-8");
     }
 }

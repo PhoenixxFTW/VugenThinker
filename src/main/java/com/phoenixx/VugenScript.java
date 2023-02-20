@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Junaid Talpur
@@ -50,17 +52,17 @@ public class VugenScript {
                     }
                     if (!startReadingActions && line.equalsIgnoreCase("[Actions]")) {
                         startReadingActions = true;
-                        System.out.println("STARTING ACTION READING @@@@");
+                        //System.out.println("STARTING ACTION READING @@@@");
                     } else if (startReadingActions) {
                         if (line.contains(".c")) {
                             vugenScript.addActionFile(line.split("=")[1]);
                         } else {
-                            System.out.println("STOPPING ACTION READING @@@");
+                            //System.out.println("STOPPING ACTION READING @@@");
                             startReadingActions = false;
                         }
                     }
 
-                    System.out.println(line);
+                    //System.out.println(line);
                     // read next line
                     line = reader.readLine();
                 }
@@ -110,10 +112,23 @@ public class VugenScript {
             FileReader fileReader = new FileReader(configFolder);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
+            //TODO Figure out how to replace the string using regex
+
+            //TODO Doesn't detect comments
             while ((line = bufferedReader.readLine()) != null) {
-                if (line.contains("lr_think_time")) {
-                    line = "\tlr_think_time("+this.getThinkTime()+");";
+                //^[1-9][0-9]{1,2}$|^\d$
+
+                Pattern pattern = Pattern.compile("lr_think_time\\(^[1-9]\\d{1,2}$|^\\d$\\)", Pattern.CASE_INSENSITIVE);
+                Matcher matcher = pattern.matcher(line);
+
+                boolean matchFound = matcher.matches();
+                if(matchFound) {
+                    System.out.println("LINE: " + line);
                 }
+
+                /*if (line.contains("lr_think_time")) {
+                    line.replace("lr_think_time("+""+")", "lr_think_time("+this.getThinkTime()+")");
+                }*/
                 lines.add(line);
             }
             fileReader.close();
