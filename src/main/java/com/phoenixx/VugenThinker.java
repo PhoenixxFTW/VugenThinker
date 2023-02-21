@@ -85,7 +85,7 @@ public class VugenThinker {
             System.out.println("\t> Config File: " + vugenScript.getConfigName());
             System.out.println("\t> Action files: " + vugenScript.getActionFiles());
 
-            vugenScript.setThinkTime(29);
+            vugenScript.setThinkTime(14);
             vugenScript.updateScript();
 
             loadedScripts.add(vugenScript);

@@ -4,8 +4,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author Junaid Talpur
@@ -116,19 +114,45 @@ public class VugenScript {
 
             //TODO Doesn't detect comments
             while ((line = bufferedReader.readLine()) != null) {
+                // The good way of doing it
                 //^[1-9][0-9]{1,2}$|^\d$
-
-                Pattern pattern = Pattern.compile("lr_think_time\\(^[1-9]\\d{1,2}$|^\\d$\\)", Pattern.CASE_INSENSITIVE);
+                /*Pattern pattern = Pattern.compile("lr_think_time\\(^[1-9]\\d{1,2}$|^\\d$\\)", Pattern.CASE_INSENSITIVE);
                 Matcher matcher = pattern.matcher(line);
 
                 boolean matchFound = matcher.matches();
                 if(matchFound) {
                     System.out.println("LINE: " + line);
-                }
+                }*/
 
                 /*if (line.contains("lr_think_time")) {
                     line.replace("lr_think_time("+""+")", "lr_think_time("+this.getThinkTime()+")");
                 }*/
+
+                //TODO Figure out if we can detect a comment "//" comes before our function or not
+
+                // The sketchy way of doing it
+                if(line.contains("lr_think_time") && !line.startsWith("\t//")) {
+                    int startIndex = line.indexOf("lr_think_time(");
+                    startIndex += 14; // Size of the function name
+
+                    System.out.println("STARTING INDEX: " + startIndex);
+
+                    // We manually count the numbers passed into the function.
+                    // THIS IS An EXTREMELY HACKY WAY of doing it, USE REGEX instead
+                    StringBuilder timeAmount = new StringBuilder();
+                    for (int i = 0; i < 6; i++) {
+                        char foundChar = line.charAt(startIndex + i);
+                        if (Character.isDigit(line.charAt(startIndex + i))) {
+                            timeAmount.append(foundChar);
+                        } else if (foundChar == ')') {
+                            break;
+                        }
+                    }
+                    int timeGiven = Integer.parseInt(timeAmount.toString());
+                    System.out.println("FOUND THINK TIME: " + timeGiven + " SCRIPT: " + actionFile);
+                    line = line.replace("lr_think_time("+timeGiven+")", "lr_think_time("+this.getThinkTime()+")");
+                }
+
                 lines.add(line);
             }
             fileReader.close();
