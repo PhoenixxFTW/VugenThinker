@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class VugenThinker {
 
     //TODO Disable after compiling
-    public static boolean DEBUG_ENV = true;
+    public static boolean DEBUG_ENV = false;
     public static String currentPath;
 
     public static int thinkTime = 0;
@@ -45,10 +45,17 @@ public class VugenThinker {
         System.out.println("Path of current program: " + currentPath);
 
         File folder = new File(currentPath);
+        if(!DEBUG_ENV) {
+            folder = folder.getParentFile();
+        }
+
+        System.out.println("UPDATED PATH: " + folder.getAbsolutePath());
+
         if(!folder.isDirectory()) {
             System.out.println("Current location is not a directory!");
             return;
         }
+
         if(Objects.requireNonNull(folder.list()).length == 0) {
             System.out.println("No scripts found in folder: " + folder.getName());
             return;
@@ -87,15 +94,6 @@ public class VugenThinker {
             loadedScripts.add(vugenScript);
         }
         System.out.println("Loaded " + loadedScripts.size() + " scripts!");
-
-        // TODO Main logic
-        /**
-         * Prompt the user to enter an option to either:
-         *      1) View all scripts
-         *      2) Settings
-         *          a) Set think-time
-         *          b) enable / disable think-time limit
-         */
 
         int option = -1;
         Scanner input = new Scanner(System.in);

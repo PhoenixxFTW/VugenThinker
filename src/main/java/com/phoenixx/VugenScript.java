@@ -102,6 +102,7 @@ public class VugenScript {
     }
 
     private void updateActionFiles() throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
         for(String actionFile: this.getActionFiles()) {
             List<String> lines = new ArrayList<>();
 
@@ -175,8 +176,10 @@ public class VugenScript {
                 bw.newLine();
             }
             bw.close();
-            System.out.println("Updated: " + actionFile);
         }
+        System.out.println("Updated: " + this.scriptFile.getName());
+        System.out.println("\t> " + actionFiles);
+        System.out.println(stringBuilder);
     }
 
     public void setScriptFile(File scriptFile) {
