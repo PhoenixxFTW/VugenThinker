@@ -145,7 +145,7 @@ public class VugenScript {
                     int startIndex = line.indexOf("lr_think_time(");
                     startIndex += 14; // Size of the function name
 
-                    System.out.println("STARTING INDEX: " + startIndex);
+                    //System.out.println("STARTING INDEX: " + startIndex);
 
                     // We manually count the numbers passed into the function.
                     // THIS IS An EXTREMELY HACKY WAY of doing it, USE REGEX instead
@@ -159,7 +159,7 @@ public class VugenScript {
                         }
                     }
                     int timeGiven = Integer.parseInt(timeAmount.toString());
-                    System.out.println("FOUND THINK TIME: " + timeGiven + " SCRIPT: " + actionFile);
+                    //System.out.println("FOUND THINK TIME: " + timeGiven + " SCRIPT: " + actionFile);
                     line = line.replace("lr_think_time("+timeGiven+")", "lr_think_time("+this.getThinkTime()+")");
                 }
 

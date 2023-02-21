@@ -151,12 +151,7 @@ public class VugenThinker {
                             scriptSelection(input);
                         } else if(settingsOptions == 5) {
                             System.out.println("\n============== VugenThinker Selected Settings ==============");
-                            System.out.println("Think time: " + thinkTime);
-                            System.out.println("Think time limiter: " + (limitThinkTime ? "ENABLED" : "DISABLED"));
-                            System.out.println((excludedScripts ? "Excluded" : "Included") + " Scripts: " + selectedScripts.size());
-                            for(int i = 0; i < selectedScripts.size(); i++) {
-                                System.out.println("\t" +(i+1)+") " + selectedScripts.get(i).getScriptFile().getName());
-                            }
+                            displaySelectedSettings();
                         } else {
                             System.out.println("Invalid option!");
                         }
@@ -164,6 +159,23 @@ public class VugenThinker {
 
                     break;
                 case 3:
+                    System.out.println("\n============== Confirmation Menu ==============");
+                    displaySelectedSettings();
+                    System.out.println("Are you sure you want to apply these changes to the scripts?");
+                    System.out.print("(y/n): ");
+                    String check = input.next();
+                    if (!check.equalsIgnoreCase("y")) {
+                        System.out.println("Cancelling.");
+                        break;
+                    }
+                    System.out.println("Applying changes...");
+
+                    List<VugenScript> scripts = (selectedScripts.size() > 0) ? selectedScripts : loadedScripts;
+                    for(VugenScript script: scripts) {
+                        script.setThinkTime(thinkTime);
+                        script.setLimitThinkTime(limitThinkTime);
+                        script.updateScript();
+                    }
                     break;
                 default:
                     System.out.println("Invalid option!");
@@ -179,7 +191,7 @@ public class VugenThinker {
             System.out.print("Enter the ID of a script (0 to exit): ");
             option = input.nextInt();
 
-            if(option > 0 && option < loadedScripts.size()) {
+            if(option > 0 && option <= loadedScripts.size()) {
                 // Get the selected script via its index(-1) and add it to our new list
                 selectedScripts.add(loadedScripts.get(option-1));
             } else {
@@ -195,6 +207,20 @@ public class VugenThinker {
             System.out.println((i+1)+") " + vugenScript.getScriptFile().getName());
             System.out.println("\t> Config File: " + vugenScript.getConfigName());
             System.out.println("\t> Action files: " + vugenScript.getActionFiles());
+        }
+    }
+
+    public static void displaySelectedSettings() {
+
+        System.out.println("Think time: " + thinkTime);
+        System.out.println("Think time limiter: " + (limitThinkTime ? "ENABLED" : "DISABLED"));
+        if(selectedScripts.size() > 0) {
+            System.out.println((excludedScripts ? "Excluded" : "Included") + " Scripts: " + selectedScripts.size());
+            for (int i = 0; i < selectedScripts.size(); i++) {
+                System.out.println("\t" + (i + 1) + ") " + selectedScripts.get(i).getScriptFile().getName());
+            }
+        } else {
+            System.out.println("Included scripts: ALL");
         }
     }
 }
