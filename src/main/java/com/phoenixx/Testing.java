@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  */
 public class Testing {
     public static void main(String[] args) {
-        String codeLine = "\t // This is a test lr_think_time(450);";
+        String codeLine = "lr_think_time(450); //";
         //^\d{1,9}\d{1,2}$|^\d$
         Pattern pattern = Pattern.compile("lr_think_time\\(^[1-9]\\d{1,2}$|^\\d$\\);", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(codeLine);
@@ -43,5 +43,16 @@ public class Testing {
         }
 
         System.out.println("TIME TOTAL: " + Integer.parseInt(timeAmount));
+
+        int commentIndex = codeLine.indexOf("//");
+        boolean containsComment = codeLine.contains("//");
+        System.out.println("COMMENT INDEX: " + commentIndex);
+        System.out.println("CONTAINS COMMENT: " + containsComment);
+
+        boolean isCommentAfter = codeLine.indexOf("//") > codeLine.indexOf("lr_think_time");
+        System.out.println("COMMENT AFTER: " + isCommentAfter);
+
+        boolean commentedOut = containsComment && !isCommentAfter;
+        System.out.println("COMMENTED OUT: " + commentedOut);
     }
 }

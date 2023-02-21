@@ -112,6 +112,7 @@ public class VugenScript {
 
             //TODO Figure out how to replace the string using regex
 
+            boolean multiComment = false;
             //TODO Doesn't detect comments
             while ((line = bufferedReader.readLine()) != null) {
                 // The good way of doing it
@@ -128,10 +129,19 @@ public class VugenScript {
                     line.replace("lr_think_time("+""+")", "lr_think_time("+this.getThinkTime()+")");
                 }*/
 
-                //TODO Figure out if we can detect a comment "//" comes before our function or not
+                //FIXME The sketchy way of doing it
+                //TODO Figure out how to implement multiline comment
 
-                // The sketchy way of doing it
-                if(line.contains("lr_think_time") && !line.startsWith("\t//")) {
+                // Multiline comment detection
+                if(!multiComment && line.contains("/*")) {
+                    multiComment = true;
+                }
+                if(multiComment && line.contains("*/")) {
+                    multiComment = false;
+                }
+
+                int commentIndex = line.indexOf("//");
+                if(!multiComment && line.contains("lr_think_time") && !(line.contains("//") && !(commentIndex > line.indexOf("lr_think_time")))) {
                     int startIndex = line.indexOf("lr_think_time(");
                     startIndex += 14; // Size of the function name
 
