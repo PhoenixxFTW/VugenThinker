@@ -2,6 +2,7 @@ package com.phoenixx;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,14 +18,17 @@ public class VugenScript {
     private File scriptFile;
     // Config folder name which contains the runtime settings
     private String configName;
+    private String globalHFileName = "globals.h";
 
     private int thinkTime;
     private boolean limitThinkTime;
     private final List<String> actionFiles;
+    private final List<String> globalVarNames;
 
     private VugenScript(File scriptFolder) {
         this.scriptFolder = scriptFolder;
         this.actionFiles = new ArrayList<>();
+        this.globalVarNames = new ArrayList<>();
     }
 
     // Builder
@@ -72,7 +76,10 @@ public class VugenScript {
     // Called to update think times in both the config and action files
     public void updateScript() throws IOException {
         this.updateConfig();
-        this.updateActionFiles();
+        if(!limitThinkTime) {
+            this.updateActionFiles();
+            this.updateGlobals();
+        }
     }
 
     private void updateConfig() throws IOException {
@@ -102,7 +109,6 @@ public class VugenScript {
     }
 
     private void updateActionFiles() throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
         for(String actionFile: this.getActionFiles()) {
             List<String> lines = new ArrayList<>();
 
@@ -114,25 +120,7 @@ public class VugenScript {
             //TODO Figure out how to replace the string using regex
 
             boolean multiComment = false;
-            //TODO Doesn't detect comments
             while ((line = bufferedReader.readLine()) != null) {
-                // The good way of doing it
-                //^[1-9][0-9]{1,2}$|^\d$
-                /*Pattern pattern = Pattern.compile("lr_think_time\\(^[1-9]\\d{1,2}$|^\\d$\\)", Pattern.CASE_INSENSITIVE);
-                Matcher matcher = pattern.matcher(line);
-
-                boolean matchFound = matcher.matches();
-                if(matchFound) {
-                    System.out.println("LINE: " + line);
-                }*/
-
-                /*if (line.contains("lr_think_time")) {
-                    line.replace("lr_think_time("+""+")", "lr_think_time("+this.getThinkTime()+")");
-                }*/
-
-                //FIXME The sketchy way of doing it
-                //TODO Figure out how to implement multiline comment
-
                 // Multiline comment detection
                 if(!multiComment && line.contains("/*")) {
                     multiComment = true;
@@ -150,18 +138,29 @@ public class VugenScript {
 
                     // We manually count the numbers passed into the function.
                     // THIS IS An EXTREMELY HACKY WAY of doing it, USE REGEX instead
-                    StringBuilder timeAmount = new StringBuilder();
-                    for (int i = 0; i < 6; i++) {
+                    String timeAmount = "";
+                    String varName = "";
+                    boolean isVar = false;
+                    for (int i = 0; i < 30; i++) {
                         char foundChar = line.charAt(startIndex + i);
-                        if (Character.isDigit(line.charAt(startIndex + i))) {
-                            timeAmount.append(foundChar);
-                        } else if (foundChar == ')') {
+                        if (foundChar == ')') {
                             break;
+                        } else if (!isVar && Character.isDigit(foundChar)) {
+                            timeAmount += foundChar;
+                            // If instead the character we found is a letter, it's probably a variable in globals.h
+                        } else if (Character.isAlphabetic(foundChar) || isVar) {
+                            isVar = true;
+                            varName += foundChar;
                         }
                     }
-                    int timeGiven = Integer.parseInt(timeAmount.toString());
-                    //System.out.println("FOUND THINK TIME: " + timeGiven + " SCRIPT: " + actionFile);
-                    line = line.replace("lr_think_time("+timeGiven+")", "lr_think_time("+this.getThinkTime()+")");
+                    if(varName.isEmpty()) {
+                        int timeGiven = Integer.parseInt(timeAmount.toString());
+                        //System.out.println("FOUND THINK TIME: " + timeGiven + " SCRIPT: " + actionFile);
+                        line = line.replace("lr_think_time(" + timeGiven + ")", "lr_think_time(" + this.getThinkTime() + ")");
+                    } else {
+                        this.globalVarNames.add(varName);
+                        System.out.println("FOUND VAR: " + varName);
+                    }
                 }
 
                 lines.add(line);
@@ -179,7 +178,75 @@ public class VugenScript {
         }
         System.out.println("Updated: " + this.scriptFile.getName());
         System.out.println("\t> " + actionFiles);
-        System.out.println(stringBuilder);
+        System.out.println("");
+    }
+
+    private void updateGlobals() throws IOException {
+        File globalFile = new File(scriptFolder, this.globalHFileName);
+        System.out.println("GLOBAL FILE: " + globalFile.getAbsolutePath());
+        if(!globalFile.exists()) {
+            System.out.println("VugenThinker could not find " + this.globalHFileName + "! Are you sure it exists?");
+            return;
+        }
+
+        String line;
+        List<String> lines = new ArrayList<>();
+        FileReader fileReader = new FileReader(globalFile);
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+        boolean multiComment = false;
+        while ((line = bufferedReader.readLine()) != null) {
+            // Multiline comment detection
+            if (!multiComment && line.contains("/*")) {
+                multiComment = true;
+            }
+            if (multiComment && line.contains("*/")) {
+                multiComment = false;
+            }
+
+            int commentIndex = line.indexOf("//");
+            if (!multiComment) {
+                for (String varName : this.globalVarNames) {
+                    String varNameCheck = varName + " = ";
+                    //FIXME BREAKS HERE, FIX THIS SHIT
+                    System.out.println("Checking line: " + line);
+                    System.out.println("FOR : " + varNameCheck);
+                    System.out.println("COMMENTED: " + (!(line.contains("//") && !(commentIndex > line.indexOf(varNameCheck)))));
+                    System.out.println("CONTAINS: " + line.contains(varNameCheck));
+                    if(line.contains(varNameCheck) && !(line.contains("//") && !(commentIndex > line.indexOf(varNameCheck)))) {
+                        int startIndex = line.indexOf(varNameCheck) + varNameCheck.length(); // Size of the variable name
+                        // Replace
+                        String timeAmount = "";
+                        for (int i = 0; i < 30; i++) {
+                            char foundChar = line.charAt(startIndex + i);
+                            if (Character.isDigit(foundChar)) {
+                                timeAmount += foundChar;
+                                // If instead the character we found is a letter, its probably a variable in globals.h
+                            } else if (foundChar == ';') {
+                                break;
+                            }
+                        }
+                        System.out.println("FOUND TIME AMOUNT FOR GLOBAL VAR: " + varName + " TIME: " + timeAmount);
+
+                        line = line.replace(varNameCheck + timeAmount, varNameCheck + this.getThinkTime() + ";");
+                    }
+                }
+            }
+            System.out.println("ADDED LINE: " + line);
+            lines.add(line);
+        }
+
+        fileReader.close();
+        bufferedReader.close();
+
+        FileOutputStream fos = new FileOutputStream(globalFile);
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+        for (String newLine: lines) {
+            bw.write(newLine);
+            bw.newLine();
+        }
+        bw.close();
+        System.out.println("FULLY UPDATED GLOBALS.H FILE @@@@");
     }
 
     public void setScriptFile(File scriptFile) {

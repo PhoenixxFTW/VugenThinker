@@ -10,9 +10,24 @@ import java.util.regex.Pattern;
  */
 public class Testing {
     public static void main(String[] args) {
-        String codeLine = "lr_think_time(450); //";
+        String codeLine = "lr_think_time(thinkTime); //";
+        int startIndex = codeLine.indexOf("lr_think_time(");
+        startIndex +=14; // Size of the function name
+
+        String foundVar = "";
+        for(int i = 0; i < 30; i++) {
+            char foundChar = codeLine.charAt(startIndex + i);
+            if(Character.isAlphabetic(codeLine.charAt(startIndex + i))) {
+                foundVar += foundChar;
+            } else if(foundChar == ')') {
+                break;
+            }
+        }
+
+        System.out.println("FOUND: " + foundVar);
+
         //^\d{1,9}\d{1,2}$|^\d$
-        Pattern pattern = Pattern.compile("lr_think_time\\(^[1-9]\\d{1,2}$|^\\d$\\);", Pattern.CASE_INSENSITIVE);
+        /*Pattern pattern = Pattern.compile("lr_think_time\\(^[1-9]\\d{1,2}$|^\\d$\\);", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(codeLine);
 
         System.out.println(matcher);
@@ -42,7 +57,7 @@ public class Testing {
             }
         }
 
-        System.out.println("TIME TOTAL: " + Integer.parseInt(timeAmount));
+        System.out.println("TIME TOTAL: " + timeAmount);
 
         int commentIndex = codeLine.indexOf("//");
         boolean containsComment = codeLine.contains("//");
@@ -53,6 +68,6 @@ public class Testing {
         System.out.println("COMMENT AFTER: " + isCommentAfter);
 
         boolean commentedOut = containsComment && !isCommentAfter;
-        System.out.println("COMMENTED OUT: " + commentedOut);
+        System.out.println("COMMENTED OUT: " + commentedOut);*/
     }
 }
