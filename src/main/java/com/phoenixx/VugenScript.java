@@ -2,7 +2,6 @@ package com.phoenixx;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -183,7 +182,7 @@ public class VugenScript {
 
     private void updateGlobals() throws IOException {
         File globalFile = new File(scriptFolder, this.globalHFileName);
-        System.out.println("GLOBAL FILE: " + globalFile.getAbsolutePath());
+        //System.out.println("GLOBAL FILE: " + globalFile.getAbsolutePath());
         if(!globalFile.exists()) {
             System.out.println("VugenThinker could not find " + this.globalHFileName + "! Are you sure it exists?");
             return;
@@ -208,11 +207,11 @@ public class VugenScript {
             if (!multiComment) {
                 for (String varName : this.globalVarNames) {
                     String varNameCheck = varName + " = ";
-                    //FIXME BREAKS HERE, FIX THIS SHIT
-                    System.out.println("Checking line: " + line);
+
+                    /*System.out.println("Checking line: " + line);
                     System.out.println("FOR : " + varNameCheck);
                     System.out.println("COMMENTED: " + (!(line.contains("//") && !(commentIndex > line.indexOf(varNameCheck)))));
-                    System.out.println("CONTAINS: " + line.contains(varNameCheck));
+                    System.out.println("CONTAINS: " + line.contains(varNameCheck));*/
                     if(line.contains(varNameCheck) && !(line.contains("//") && !(commentIndex > line.indexOf(varNameCheck)))) {
                         int startIndex = line.indexOf(varNameCheck) + varNameCheck.length(); // Size of the variable name
                         // Replace
@@ -226,13 +225,12 @@ public class VugenScript {
                                 break;
                             }
                         }
-                        System.out.println("FOUND TIME AMOUNT FOR GLOBAL VAR: " + varName + " TIME: " + timeAmount);
-
-                        line = line.replace(varNameCheck + timeAmount, varNameCheck + this.getThinkTime() + ";");
+                        //System.out.println("FOUND TIME AMOUNT FOR GLOBAL VAR: " + varName + " TIME: " + timeAmount);
+                        line = line.replace(varNameCheck + timeAmount, varNameCheck + this.getThinkTime());
                     }
                 }
             }
-            System.out.println("ADDED LINE: " + line);
+            //System.out.println("ADDED LINE: " + line);
             lines.add(line);
         }
 
@@ -246,7 +244,8 @@ public class VugenScript {
             bw.newLine();
         }
         bw.close();
-        System.out.println("FULLY UPDATED GLOBALS.H FILE @@@@");
+        System.out.println("Updated globals.h!");
+        //System.out.println("FULLY UPDATED GLOBALS.H FILE @@@@");
     }
 
     public void setScriptFile(File scriptFile) {
