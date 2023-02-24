@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class VugenThinker {
 
     //TODO Disable after compiling
-    public static boolean DEBUG_ENV = true;
+    public static boolean DEBUG_ENV = false;
     public static String currentPath;
 
     public static int thinkTime = 0;

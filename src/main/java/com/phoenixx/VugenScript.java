@@ -158,7 +158,7 @@ public class VugenScript {
                         line = line.replace("lr_think_time(" + timeGiven + ")", "lr_think_time(" + this.getThinkTime() + ")");
                     } else {
                         this.globalVarNames.add(varName);
-                        System.out.println("FOUND VAR: " + varName);
+                        //System.out.println("FOUND VAR: " + varName);
                     }
                 }
 
