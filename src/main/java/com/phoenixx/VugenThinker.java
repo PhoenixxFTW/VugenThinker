@@ -1,7 +1,6 @@
 package com.phoenixx;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,7 @@ public class VugenThinker {
     public static List<VugenScript> loadedScripts = new ArrayList<>();
     public static List<VugenScript> selectedScripts = new ArrayList<>();
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         System.out.println();
         if(DEBUG_ENV) {
             System.out.println("WARNING: The VugenThinker application is set to run in a DEBUG ENVIRONMENT. EXIT NOW OR THERE MAY BE DATA LOSS.");
@@ -61,40 +60,79 @@ public class VugenThinker {
             return;
         }
 
-        System.out.println("Found " + Objects.requireNonNull(folder.list()).length + " potential script files, loading now...");
+        Scanner input = new Scanner(System.in);
 
-        List<File> vugenScripts = new ArrayList<>();
+        System.out.println("======================== Selection Menu ========================");
+        System.out.println("Please select which type of script you'd like to modify: ");
+        System.out.println("0) Exit");
+        System.out.println("1) LoadRunner Vugen (Mass modify think times)");
+        System.out.println("2) LoadRunner Controller (Update controller script runtime(s)");
+        System.out.print("> ");
+        int option = input.nextInt();
 
-        for(File fileFound: Objects.requireNonNull(folder.listFiles())) {
-            if(fileFound.isDirectory()) {
-                //System.out.println("Directory: " + fileFound.getName());
-                boolean isVugenScript = false;
-                for(String fileName: Objects.requireNonNull(fileFound.list())) {
-                    //System.out.println("\t> " + fileName);
-                    if(fileName.contains(".usr")) {
-                        isVugenScript = true;
-                        break;
+        if(option == 1 || option == 2) {
+            // Subtract 1 since I believe this will also contain the jar file as well
+            System.out.println("Found " + (Objects.requireNonNull(folder.list()).length-1) + " potential script files, loading now...");
+
+            List<File> vugenScripts = new ArrayList<>();
+
+            for(File fileFound: Objects.requireNonNull(folder.listFiles())) {
+                if(fileFound.isDirectory()) {
+                    //System.out.println("Directory: " + fileFound.getName());
+                    boolean isLRScript = false;
+                    for(String fileName: Objects.requireNonNull(fileFound.list())) {
+                        //System.out.println("\t> " + fileName);
+                        if(fileName.contains(option==1 ? ".usr" : ".lsr")) {
+                            isLRScript = true;
+                            break;
+                        }
+                    }
+                    if(isLRScript) {
+                        //System.out.println("Found Vugen script: " + fileFound.getName());
+                        vugenScripts.add(fileFound);
                     }
                 }
-                if(isVugenScript) {
-                    //System.out.println("Found Vugen script: " + fileFound.getName());
-                    vugenScripts.add(fileFound);
+            }
+
+            System.out.println("Loading vugen scripts...");
+            // Script folders
+            for(File scriptFolder: vugenScripts) {
+                if(!scriptFolder.isDirectory()) {
+                    System.out.println("Script file: " + scriptFolder.getName() + " IS NOT A DIRECTORY. Cancelling...");
+                    continue;
                 }
+                VugenScript vugenScript = VugenScript.buildScript(scriptFolder);
+                loadedScripts.add(vugenScript);
             }
-        }
+            System.out.println("Loaded " + loadedScripts.size() + " scripts!");
 
-        System.out.println("Loading vugen scripts...");
-        // Script folders
-        for(File scriptFolder: vugenScripts) {
-            if(!scriptFolder.isDirectory()) {
-                System.out.println("Script file: " + scriptFolder.getName() + " IS NOT A DIRECTORY. Cancelling...");
-                continue;
+            if(option == 1) {
+                vugenScript();
+            } else {
+                controllerScript();
             }
-            VugenScript vugenScript = VugenScript.buildScript(scriptFolder);
-            loadedScripts.add(vugenScript);
+        } else {
+            System.out.println("Exiting...");
         }
-        System.out.println("Loaded " + loadedScripts.size() + " scripts!");
+    }
 
+    public static void controllerScript() throws Exception {
+        int option = -1;
+        Scanner input = new Scanner(System.in);
+
+        while (option != 0) {
+            System.out.println("\n======================= Controller Main Menu =======================");
+            System.out.println("Select an option:");
+            System.out.println("0) Exit");
+            System.out.println("1) View scripts in current folder");
+            System.out.println("2) Settings");
+            System.out.println("3) Apply changes");
+            System.out.print("> ");
+            option = input.nextInt();
+        }
+    }
+
+    public static void vugenScript() throws Exception {
         int option = -1;
         Scanner input = new Scanner(System.in);
 
@@ -159,7 +197,7 @@ public class VugenThinker {
                 case 3:
                     System.out.println("\n============== Confirmation Menu ==============");
                     displaySelectedSettings();
-                    System.out.println("Are you sure you want to apply these changes to the scripts?");
+                    System.out.println("Are you sure you want to apply these changes* to the scripts?");
                     System.out.print("(y/n): ");
                     String check = input.next();
                     if (!check.equalsIgnoreCase("y")) {
@@ -209,7 +247,6 @@ public class VugenThinker {
     }
 
     public static void displaySelectedSettings() {
-
         System.out.println("Think time: " + thinkTime);
         System.out.println("Think time limiter: " + (limitThinkTime ? "ENABLED" : "DISABLED"));
         if(selectedScripts.size() > 0) {

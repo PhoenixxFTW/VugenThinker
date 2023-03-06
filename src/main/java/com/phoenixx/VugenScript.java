@@ -75,9 +75,13 @@ public class VugenScript {
     // Called to update think times in both the config and action files
     public void updateScript() throws IOException {
         this.updateConfig();
+        System.out.println("Updated: " + this.scriptFile.getName());
+
         if(!limitThinkTime) {
             this.updateActionFiles();
             this.updateGlobals();
+            System.out.println("\t> " + actionFiles);
+            System.out.println("\t> " + this.globalHFileName);
         }
     }
 
@@ -115,8 +119,6 @@ public class VugenScript {
             File configFolder = new File(scriptFolder, actionFile);
             FileReader fileReader = new FileReader(configFolder);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-            //TODO Figure out how to replace the string using regex
 
             boolean multiComment = false;
             while ((line = bufferedReader.readLine()) != null) {
@@ -175,9 +177,6 @@ public class VugenScript {
             }
             bw.close();
         }
-        System.out.println("Updated: " + this.scriptFile.getName());
-        System.out.println("\t> " + actionFiles);
-        System.out.println("");
     }
 
     private void updateGlobals() throws IOException {
