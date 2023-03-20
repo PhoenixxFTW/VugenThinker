@@ -207,11 +207,17 @@ public class VugenScript {
             if (!multiComment) {
                 for (String varName : this.globalVarNames) {
                     String varNameCheck = varName + " = ";
+                    String varNameCheck2 = varName + "=";
 
                     /*System.out.println("Checking line: " + line);
                     System.out.println("FOR : " + varNameCheck);
                     System.out.println("COMMENTED: " + (!(line.contains("//") && !(commentIndex > line.indexOf(varNameCheck)))));
                     System.out.println("CONTAINS: " + line.contains(varNameCheck));*/
+
+                    // Quick hacky fix to counter any inconsistencies in the formatting of the globals.h file
+                    if(line.contains(varNameCheck2)) {
+                        varNameCheck = varNameCheck2;
+                    }
                     if(line.contains(varNameCheck) && !(line.contains("//") && !(commentIndex > line.indexOf(varNameCheck)))) {
                         int startIndex = line.indexOf(varNameCheck) + varNameCheck.length(); // Size of the variable name
                         // Replace
